@@ -1,41 +1,36 @@
-<script setup lang="ts">
-import { ref } from 'vue'
-
-defineProps<{ msg: string }>()
-
-const count = ref(0)
-</script>
-
 <template>
-  <h1>{{ msg }}</h1>
-
-  <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR
-    </p>
-  </div>
-
-  <p>
-    Check out
-    <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank"
-      >create-vue</a
-    >, the official Vue + Vite starter
-  </p>
-  <p>
-    Learn more about IDE Support for Vue in the
-    <a
-      href="https://vuejs.org/guide/scaling-up/tooling.html#ide-support"
-      target="_blank"
-      >Vue Docs Scaling up Guide</a
-    >.
-  </p>
-  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
+  <div v-html="content" class="markdown-body" id="markdown"></div>
 </template>
 
+<script setup>
+import { ref, watchEffect } from "vue";
+import { useRoute } from "vue-router";
+import { marked } from 'marked';
+// import "github-markdown-css/github-markdown-dark.css"
+import "../assets/styles/markdown.css"
+import "../assets/styles/github.css"
+import hljs from 'highlight.js'
+import 'highlight.js/styles/foundation.css'
+const route = useRoute();
+const content = ref('');
+
+watchEffect(() => {
+  const modules = import.meta.glob('../lib/**/*.md', { as: 'raw' })
+  console.log("🚀 ~ watchEffect ~ modules:", modules)
+  // const path = `../lib/处理模型载荷计算逻辑/${route.params.name.join('/')}`
+
+for(let module in modules){
+ modules[module]().then((mdContent) => {
+      content.value = marked.parse(mdContent)
+    })
+    }
+});
+</script>
+
 <style scoped>
-.read-the-docs {
-  color: #888;
+@import 'github-markdown-css/github-markdown.css';
+
+.markdown-body {
+  padding: 20px;
 }
 </style>
